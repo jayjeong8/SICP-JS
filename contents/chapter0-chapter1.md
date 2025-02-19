@@ -151,3 +151,86 @@ test(0,p());
 true ? 0 : p(); // 술어가 참으로 평가되면 해석기는 귀결 표현식을 평가해서 그 값을 조건부 표현식 값으로 돌려준다.
 0; // 결과는 0
 ```
+
+## 1.1.7
+> 수학 함수와 컴퓨터 함수의 이러한 차이점은 사물의 속성을 서술하는 것과 뭔가를 하는 방법을 서술하는 것의 차이를 반영한다. 
+> 이를 선언적 지식과 명령적 지식의 구분이라고 말하기도 한다. 
+> 수학에서는 주로 선언적 서술(이것을 무엇인가?)에 관심을 두지만 컴퓨터 과학에서는 주로 명력적 서술(어떻게 하는가?)에 관심을 둔다.
+
+### 연습문제 1.6 - sqrt_iter 함수를 삼항 연산자 대신 conditional 함수로 변경했을 때 어떤 일이 생기는지 설명하라.
+#### 예시
+```js
+function sqrt_iter(guess, x) {
+  return is_good_enough(guess, x)
+    ? guess
+    : sqrt_iter(improve(guess, x), x);
+}
+
+function is_good_enough(guess, x) {
+  return abs(square(guess) - x) < 0.001;
+}
+
+function improve(guess, x) {
+  return average(guess, x / guess);
+}
+
+function average(x, y) {
+  return (x + y) / 2;
+}
+```
+```js
+function conditional(predicate, thenClause, elseClause) {
+  return predicate ? thenClause : elseClause;
+}
+
+function sqrt_iter(guess, x) {
+  return conditional(
+    is_good_enough(guess, x),
+    guess,
+    sqrt_iter(improve(guess, x), x)
+  )
+}
+```
+#### 정답
+1. 삼항연산자는 predicate가 참이 아닐 때만 elseClause를 실행한다.   
+2. `conditional`처럼 함수로 만든 경우 자바스크립트는 인수를 먼저 평가하기 때문에 인수를 먼저 실행한다.   
+3. 그러므로 `sqrt_iter(improve(guess, x), x)`가 함수 본문보다 먼저 실행된다.  
+4. `sqrt_iter` 안에는 다시 `sqrt_iter(improve(guess, x), x)`를 인수로 가진 `conditional` 함수가 있다.  
+5. 그러므로 끝없이 `sqrt_iter(improve(guess, x), x)`를 실행하며 **무한 재귀에 빠진다.**
+
+- 연습문제 1.5에서 자바스크립트가 인수 우선 평가로 동작하는걸 배웠다. 그러나 conditional 함수는 삼항 연산자에 이름을 붙여 추상화했을 뿐이므로 동일하게 동작할 거라고 생각했다. 
+- 정상 순서 평가인 언어였다면 삼항연산자와 conditional 함수는 동일하게 동작한다. 단순한 기능을 만들 때도 언어가 어떻게 동작하는지 알아야 의도한대로 기능을 구현할 수 있다.
+
+### 연습문제 1.7 - is_good_enough 판정 방식이 아주 작은 수와 아주 큰 수에 대해 부적합한 이유를 설명하고 사례를 제시하라.
+```js
+function is_good_enough(guess, x) {
+  return abs(square(guess) - x) < 0.001;
+}
+```
+- 부적합한 이유: 오차 범위가 0.001로 고정되어 있다.
+  - 작은 값 예시: x = 0.0000001 일 때 제곱근은 0.0000001보다 작아야하지만 중간 과정에서 0.001보다 작은 값이 나오면 `is_good_enough`를 통과한다.
+  - 큰 값 예시: x = 1000000000000 정도로 클 때, 중간 과정에서 나온 값이 충분히 좋은(is_good_enough) 값이지만 오차 허용 범위가 너무 작기 때문에 `is_good_enough`를 통과하지 못한다.
+
+#### 절대 오차에서 상대 오차를 계산하는 방식으로 변경
+```js
+function is_good_enough(guess, x) {
+  return (abs(square(guess) - x) / x) < 0.001; // 평균값에서 x를 나눠서 작은 수는 큰 수로, 큰 수는 작은 수로 만들어 0.001과 비교한다.
+}
+```
+
+### 연습문제 1.8 - 세제곱근 근삿값 구하는 뉴턴 방법을 함수로 구현하라.
+```js
+function cbrt_iter(guess, x){
+  return is_good_enough(guess, x) 
+  ? guess 
+  : cbrt_iter(improve(guess, x), x);
+}
+
+function is_good_enough(guess, x) {
+  return (abs(cube(guess) - x) / x) < 0.001;
+}
+
+function improve(guess, x) {
+  return ((x / (guess ** 2)) + (2 * guess)) / 3;
+}
+```
