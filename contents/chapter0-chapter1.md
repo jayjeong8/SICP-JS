@@ -234,3 +234,63 @@ function improve(guess, x) {
   return ((x / (guess ** 2)) + (2 * guess)) / 3;
 }
 ```
+
+## 1.1.8 블랙박스 추상으로서의 함수
+- 문제는 다수의 부분 문제로 분해할 수 있다. 프로그램은 부분 문제에 대응하는 함수들의 군집이다. 
+- 분해 전략 - 각 함수를 모듈로 사용해서 다른 함수에서 사용할 수 있는 형태로 분해한다. 
+- 사용하는 함수 쪽에서는 내부 구현을 알 필요 없이 블랙박스 취급할 수 있어야 한다. (ex_`is_good_enough`에서는 `square` 구현을 몰라도 제곱값을 구한다는 return값 정보만 가지고 사용한다.) 
+
+> 사용자는 함수가 어떻게 구현되었는지 몰라도 함수를 사용할 수 있어야 한다.
+
+#### 지역 이름
+- 매개변수는 함수에 묶인(바인딩) 값이다. 함수 매개변수 이름에는 함수 scope에서만 통하는 이름(지역 이름)을 사용해야 한다.
+- 자유 이름(함수 이름)은 이름이 변하면 함수를 사용하는 쪽의 의미에 영향을 미친다.
+
+> `is_good_enough`의 올바른 작동은 `abs`라는 이름이 주어진 수의 절댓값을 계산하는 함수를 지칭한다는 사실에 의존한다.  
+> 예를 들어 `abs` 함수 본문을 `math_cos` 함수 본문으로 대체하면 `is_good_enough` 함수가 이전과는 다른 결과를 내게 된다.
+
+#### 내부 선언과 블록 구조
+- 연습문제 1.6 첫번째 예시를 아래와 같이 변경
+  - 사용자가 사용할 함수가 sqrt 뿐이라면 나머지 함수는 보조 함수다. 대형 시스템을 다수의 프로그래머가 함께 구축할 때 비슷한 보조 함수를 만들어 혼란을 줄 수 있으므로 개선한다.
+  - 블록 안에 선언된 이름은 블록 내부로 한정되므로 매개변수를 단순하게 변경
+  
+```js
+function sqrt(x) {
+  function is_good_enough(guess) {
+    return abs(square(guess) - x) < 0.001;
+  }
+  function improve(guess){
+    return average(guess, x / guess);
+  }
+  function sqrt_iter(guess) {
+    return is_good_enough(guess)
+      ? guess
+      : sqrt_iter(improve(guess));
+  }
+  return sqrt_iter(1);
+}
+```
+
+- 생각: 이 책에서는 큰 프로그램을 나누는 목적으로 블록 구조를 적극적으로 활용한다고 하는데, 개인적으로는 위 블록구조보다 1.6 예시 코드가 좋은 것 같다. 
+  - 중첩이 적어서 읽기 편하다.
+  - 현대 자바스크립트에서 구분된 파일, export, private를 활용할 수 있다. 
+  - 내가 정리한 1.6 예시 코드에서 선언 순서는 리팩터링 책을 참고해서 작성했다. 이렇게 큰 함수(사용이 먼저되는 함수)가 먼저 선언되었을 때 코드 흐름을 읽기 좋은 것 같다. 위 블록 구조를 뒤집어서 return문이 먼저 오게 할 수도 있을 것 같다.
+
+```js
+// 사용이 먼저되는 함수가 위쪽으로 오도록 작성한다면?
+function sqrt(x) {
+  return sqrt_iter(1);
+
+  function sqrt_iter(guess) {
+    return is_good_enough(guess)
+            ? guess
+            : sqrt_iter(improve(guess));
+  }
+  function is_good_enough(guess) {
+    return abs(square(guess) - x) < 0.001;
+  }
+  function improve(guess){
+    return average(guess, x / guess);
+  }
+}
+```
