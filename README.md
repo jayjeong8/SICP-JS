@@ -6,4 +6,4 @@
 )
 
 ### 내용 정리
-- [chapter0 ~ chapter1](https://github.com/jayjeong8/SICP-JS/blob/main/contents/chapter0-chapter1.md)
+- [chapter0 ~ chapter1.1](https://github.com/jayjeong8/SICP-JS/blob/main/contents/chapter0~chapter1_1.md)
