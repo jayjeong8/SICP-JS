@@ -288,3 +288,99 @@ function h(n) {
   return A(2, n);
 }
 ```
+
+## 1.2.2 트리 재귀
+- 피보나치 수열을 계산하는 두가지 방법
+
+### 1. 트리 재귀적 과정
+```js
+function fib(n) {
+  return n === 0
+    ? 0
+    : n=== 1
+    ? 1 
+    : fib(n - 1) + fib(n - 2);
+}
+```
+- fib가 한번 호출될 때마다 또 다른 두 fib 호출이 발생한다. 
+- n을 줄여가며 같은 작업을 반복한다. 중복 계산하는 말단 노드(`fib(1)`, `fib(0)`) 개수는 `fib(n + 1)`이다.
+- `fib(n)`은 `ϕⁿ/ √5`에 가장 가까운 정수인데 `ϕ² = ϕ + 1`이다. 
+  - n이 올라갈 때 마다 `fib(n + 1)` 만큼이나 계산을 한다는 건 `fib(n²)`과 유사한 만큼 계산을 더 하는 거고, 지수적으로 계산이 증가한다는 의미이다.
+
+
+
+### 2. 반복적 과정
+```js
+function fib(n) {
+  return fib_iter(1, 0, n);
+}
+
+function fib_iter(a, b, count) {
+  return count === 0
+    ? b
+    : fib_iter(a + b, a, count -1);
+}
+
+// 이해하기 쉽게 변수명 변경
+function fib_iter(next, curr, remaining) {
+  return remaining === 0
+    ? curr
+    : fib_iter(curr + next, next, remaining - 1);
+}
+```
+- 필요한 단계의 수는 n에 선형으로 비례한다.                                     
+
+
+### 연습문제 1.11
+
+> 만일 `n < 3`이면 `f(n) = n`이고 만일 `n >= 3`이면 `f(n) = f(n - 1) + 2f(n - 2) + 3f(n - 3)`으로 정의되는 함수 f가 있다.  
+> 재귀적 과정으로 f를 계산하는 자바스크립트 함수를 작성하라.   
+> 반복적 과정으로 f를 계산하는 자바스크립트 함수를 작성하라.
+
+#### 재귀적 과정
+```js
+function recursive(n) {
+  return n < 3 
+    ? n
+    : recursive(n - 1) + (2 * recursive(n - 2)) + (3 * recursive(n - 3));
+}
+```
+
+#### 반복적 과정
+```js
+function iterative(n) {
+  return n < 3
+    ? n 
+    : iter(2, 1, 0, n - 2); //  f(2)까지 계산해서 시작하므로 count에서 2를 제외한다.
+}
+
+function iter(a, b, c, n) {
+  return n === 0
+    ? a
+    : iter(a + (2 * b) + (3 * c), a, b, n - 1);
+}
+```
+- a, b, c 각 인자를 `f(n - 1)`, `2f(n - 2)`, `3f(n - 3)`로 사용한다. 
+  - 반복할 때 마다 `n - 1`에 해당하는 a에 새로운 계산 값을 넣고 나머지는 이전 값(b, c 자리)으로 옮긴다.
+
+
+### 연습문제 1.12
+> 파스칼의 삼각형을 재귀적 과정으로 계산하는 함수를 작성하라
+
+```js
+function pascals(x, y) {
+  if (x > y) return 0;
+  
+  if (x === 1 || x === y) {
+    return 1;
+  }
+  
+  return pascals(x - 1, y - 1) + pascals(x, y - 1);
+}
+```
+
+### 연습문제 1.13
+> `Fib(n)`이 `ϕⁿ/ √5`에 가장 가까운 정수임을 증명하라  
+> 힌트: 귀납법과 피보나치 수열의 정의를 이용해서 `Fib(n) = ϕⁿ- ψⁿ/ √5`을 먼저 증명해볼 것
+
+<img src="../img/q-1_13.jpg" width="480"/>
