@@ -384,3 +384,105 @@ function pascals(x, y) {
 > 힌트: 귀납법과 피보나치 수열의 정의를 이용해서 `Fib(n) = ϕⁿ- ψⁿ/ √5`을 먼저 증명해볼 것
 
 <img src="../img/q-1_13.jpg" width="480"/>
+
+
+## 1.2.3 증가 차수
+- 증가 차수: 입력이 커질 수록 요구되는 자원의 양을 대략적으로 측정한 값  
+- 필요한 자원 양을 `R(n)`, `R(n)`의 증가 차수를 `Θ(f(n))`라고 말한다. (`Θ`는 세타라고 읽는다.)
+  - `R(n)` = `Θ(f(n))`
+
+### 연습문제 1.14 
+> 잔돈 11센트를 만드는 문제를 count_change 함수가 생성하는 과정을 트리로 표시하라.   
+잔돈 금액 증가에 따른 공간 및 단계 수의 증가 차수는 무엇인가?
+
+```js
+function count_change(amount) {
+    return cc(amount, 5);
+}
+
+function cc(amount, kinds_of_coins) {
+    return amount === 0
+           ? 1
+           : amount < 0 || kinds_of_coins === 0
+           ? 0
+           : cc(amount, kinds_of_coins - 1)
+             +
+             cc(amount - first_denomination(kinds_of_coins),
+                kinds_of_coins);
+}
+
+function first_denomination(kinds_of_coins) {
+    return kinds_of_coins === 1 ? 1
+         : kinds_of_coins === 2 ? 5
+         : kinds_of_coins === 3 ? 10
+         : kinds_of_coins === 4 ? 25
+         : kinds_of_coins === 5 ? 50
+         : 0;   
+}
+```
+<img src="../img/q-1_14.jpg" width="480"/>
+
+- 공간 복잡도: `Θ(n)`
+  - 각 트리 계산 시점에 메모리에 유지되는건 한 경로 뿐이다.
+  - 트리 최대 깊이는 amount(n)에 비례한다.
+
+- 시간 복잡도: `Θ(n^k)`
+  - amount(n)와 kinds_of_coins(k)에 따라 지수적으로 증가한다.
+  - 각 동전 종류마다 amount까지 모든 깊이를 확인하므로 `Θ(n^k)`
+
+- `cc(amount, kinds_of_coins - 1)`: **현재 금액을 유지**하고 동전 종류만 줄임
+  - kinds_of_coins 종류가 늘어날 수록 **너비**(width)가 넓어진다.
+  - kinds_of_coins이 하나씩 줄어들 때마다 amount를 줄여가며 amount가 없어질 때까지 계산한다.
+- `cc(amount - coin, kinds_of_coins)`: 현재 동전으로 금액을 줄이고 **동전 종류는 유지**
+  - amount 값이 커질 수록 **깊이**(depth)가 깊어진다.
+  - k개 동전을 amount 깊이까지 계산 
+- k개 가지가 n만큼 뻗어나간다.
+
+### 연습문제 1.15
+> 주어진 각도(라디안 단위)의 사인값을 계산한다고 하자.   
+> 한 가지 방법은, 만일 x가 충분히 작다면 근사적으로 `sin x ≈ x`(sin x는 x와 거의 같다) 라는 점과 
+> 다음과 같은 삼각함수 항등식을 이용해서 사인의 인수 x의 크기를 줄일 수 있다는 점을 이용하는 것이다.
+
+<img src="../img/q-1_15_sin_x.png" width="200"/>
+
+> 이 연습 문제의 목적에서는, 각도의 크기(절댓값)가 0.1라디안보다 크지 않다면 "충분히 작은" 것으로 간주한다.)  
+> 다음은 이러한 착안을 그대로 옮긴 자바스크립트 함수들이다.
+
+```js
+function abs(x) {
+  return x >= 0 ? x : - x;
+}
+
+function cube(x) {
+  return x * x * x;
+}
+function p(x) {
+  return 3 * x - 4 * cube(x);
+}
+function sine(angle) {
+  return ! (abs(angle) > 0.1) 
+          ? angle // 각도(라디안) 절댓값이 0.1 라디안보다 작으면 각도를 그대로 반환
+          : p(sine(angle / 3)); // 아니면 0.1보다 작아질 때 까지 각도를 계속 줄인 다음에 역계산
+}
+```
+
+> 문제 a. sine(12.15)를 평가할 때 함수 p가 몇 번이나 적용되는가?
+```js
+// sine 함수에 넘기는 각도가 0.1라디안보다 작아질 때까지 실행
+sine(12.15);
+p(sine(4.05)) // 12.15 / 3
+p(p(sine(1.35))); // 4.05 / 3
+p(p(p(sine(0.45)))); // 1.35 / 3
+p(p(p(p(sine(0.15))))); // 0.45 / 3
+p(p(p(p(p(sine(0.05)))))); // 0.15 / 3
+
+/* 정답: 5번 */
+```
+
+
+> 문제 b. sine(a)를 평가할 때 sine 함수가 생성하는 과정에 쓰이는 공간과 단계 수의 증가 차수(a의 함수로서의)는 무엇인가?
+- 각 재귀 단계마다 하나의 p(sine(a)) 함수 호출
+- 필요한 단계 수는 a를 3으로 나누어야 하는 횟수
+- 역으로는 3을 몇번 곱해야 n이 되는지로 계산할 수 있으므로 `log₃(a)`
+- 공간과 단계 수의 증가 차수는 `Θ(log a)`
+
