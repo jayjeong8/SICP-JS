@@ -687,3 +687,71 @@ return 0 === 0 ? 2 : gcd(0, 2 % 0);
 // 결과: 1 + 1 + 1 + 1 = 4번
 ```
 
+
+## 1.2.6 예제: 소수 판정 
+
+### 연습문제 1.21
+> smallest_divisor 함수를 이용해서 199, 1999, 19999의 최소 약수를 각각 구하라
+- 199, 1999, 7
+
+### 연습문제 1.22
+> 원시 함수 get_time은 아무 인수도 받지 않고 UTC 기준으로 1970년 1월 1일 00시 00분 00초로부터 흐른 밀리초의 개수를 돌려준다. 
+> 다음 timed_prime_test는 인수로 주어진 정수 n을 화면에 출력한 후 그것이 소수인지 판정한다. 
+> 만일 n이 소수이면 이 함수는 별표 세 개와 판정에 걸린 시간을 출력한다.
+
+```js
+function square(x) {
+    return x * x;
+}
+
+function smallest_divisor(n) {
+    return find_divisor(n, 2);
+}
+function find_divisor(n, test_divisor) {
+    return square(test_divisor) > n
+           ? n
+           : divides(test_divisor, n)
+           ? test_divisor
+           : find_divisor(n, test_divisor + 1);
+}
+function divides(a, b) {
+    return b % a === 0;
+}
+
+function is_prime(n) {
+    return n === smallest_divisor(n);
+}
+
+function timed_prime_test(n) {
+    display(n);
+    return start_prime_test(n, get_time());
+}
+
+function start_prime_test(n, start_time) {
+    return is_prime(n)
+           ? report_prime(get_time() - start_time)
+           : false;
+}
+
+function report_prime(elapsed_time) {
+    display(" *** ");
+    display(elapsed_time);
+    return true;
+}
+```
+> 위 함수를 이용해서, 주어진 구간의 연속된 홀수들의 소수성을 판정하는 함수 search_for_primes를 작성하라. 
+> 그리고 그 함수를 이용해서 1,000 | 10,000 | 100,000 | 1,000,000 보다 큰 최소 소수 세 개씩 구하라. 
+> 각 소수 판정에 걸린 시간을 확인하라. 결과는 프로그램 실행 시간이 계산 단계수에 비례한다는 개념과 부합하는가?
+
+- 문제 예시 케이스에 대해서는 elapsed_time이 0,1 정도만 나옴
+```js
+function search_for_primes(start, count) {
+  return count === 0 
+    ? true
+    : start % 2 === 0
+    ? search_for_primes(start + 1, count)
+    : timed_prime_test(start)
+    ? search_for_primes(start + 2, count - 1)
+    : search_for_primes(start + 2, count);
+}
+```
