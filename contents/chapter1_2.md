@@ -755,3 +755,23 @@ function search_for_primes(start, count) {
     : search_for_primes(start + 2, count);
 }
 ```
+
+### 연습문제 1.23
+> smallest_divisor 성능 개선. 짝수는 2로 나눠지므로 판정하지 않고 다음으로 넘기는 next 함수를 선언하라. 
+> 프로그램이 이전보다 두배 빠르게 실행되는지 확인하고, 두배가 아닌 이유를 설명하라.
+
+- 두배가 아닌 이유
+  - next 함수 호출 오버헤드 및 조건문 처리 시간
+```js
+function find_divisor(n, test_divisor) {
+  return square(test_divisor) > n
+          ? n
+          : divides(test_divisor, n)
+                  ? test_divisor
+                  : find_divisor(n, next(test_divisor)); // 기존 함수와 차이나는 부분
+}
+
+function next(n) {
+  return (n === 2) ? 3 : (n + 2);
+}
+```
